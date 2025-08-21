@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PartiCol CRUD</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+            --bg-light: #f4f7f6;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-light);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            color: var(--dark-color);
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        div.container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        p.instructions {
+            background-color: var(--info-color);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 0.95em;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--light-color);
+        }
+
+        form div {
+            margin-bottom: 0;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        form input[type="text"],
+        form input[type="date"],
+        form input[type="number"],
+        form textarea {
+            width: calc(100% - 16px);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        form input[type="text"]:focus,
+        form input[type="date"]:focus,
+        form input[type="number"]:focus,
+        form textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        form button {
+            grid-column: 1 / -1;
+            padding: 12px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            justify-self: start;
+        }
+
+        form button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 0.95em;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--light-color);
+        }
+
+        tbody tr:hover {
+            background-color: #e9ecef;
+            transition: background-color 0.3s ease;
+        }
+
+        .actions button {
+            margin-right: 8px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .edit-btn {
+            background-color: var(--warning-color);
+            color: var(--dark-color);
+            border: none;
+        }
+
+        .edit-btn:hover {
+            background-color: #e0a800;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .close-button {
+            color: var(--secondary-color);
+            float: right;
+            font-size: 32px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover, .close-button:focus {
+            color: var(--dark-color);
+            text-decoration: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            form {
+                grid-template-columns: 1fr;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>PartiCol CRUD Interface</h1>
+
+    <p class="instructions">
+        <strong>Instrucciones:</strong> Abre este archivo HTML en tu navegador. Asegúrate de que tu API de ASP.NET Core esté corriendo.
+        La URL base de la API ahora es relativa (`/api`), ya que la aplicación web se sirve desde el mismo servidor.
+    </p>
+
+    <div class="container">
+        <h2>Partidos</h2>
+        <h3>Crear Nuevo Partido</h3>
+        <form id="createPartidoForm">
+            <div>
+                <label for="partidoNombre">Nombre:</label>
+                <input type="text" id="partidoNombre" required>
+            </div>
+            <div>
+                <label for="partidoIdeologia">Ideología:</label>
+                <input type="text" id="partidoIdeologia" required>
+            </div>
+            <div>
+                <label for="partidoFundacion">Fundación:</label>
+                <input type="date" id="partidoFundacion" required>
+            </div>
+            <div>
+                <label for="partidoDescripcion">Descripción:</label>
+                <textarea id="partidoDescripcion" rows="3"></textarea>
+            </div>
+            <button type="submit">Crear Partido</button>
+        </form>
+
+        <h3>Lista de Partidos</h3>
+        <table id="partidosTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Ideología</th>
+                    <th>Fundación</th>
+                    <th>Descripción</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Partidos will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2>Políticos</h2>
+        <h3>Crear Nuevo Político</h3>
+        <form id="createPoliticoForm">
+            <div>
+                <label for="politicoNombre">Nombre:</label>
+                <input type="text" id="politicoNombre" required>
+            </div>
+            <div>
+                <label for="politicoCargoActual">Cargo Actual:</label>
+                <input type="text" id="politicoCargoActual" required>
+            </div>
+            <div>
+                <label for="politicoPerfilIdeologico">Perfil Ideológico:</label>
+                <input type="text" id="politicoPerfilIdeologico">
+            </div>
+            <div>
+                <label for="politicoTwitter">Twitter:</label>
+                <input type="text" id="politicoTwitter">
+            </div>
+            <div>
+                <label for="politicoPartidoId">ID del Partido:</label>
+                <input type="number" id="politicoPartidoId" required>
+            </div>
+            <button type="submit">Crear Político</button>
+        </form>
+
+        <h3>Lista de Políticos</h3>
+        <table id="politicosTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Cargo Actual</th>
+                    <th>Perfil Ideológico</th>
+                    <th>Twitter</th>
+                    <th>Partido ID</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Políticos will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Edit Partido Modal -->
+    <div id="editPartidoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('editPartidoModal')">&times;</span>
+            <h2>Editar Partido</h2>
+            <form id="editPartidoForm">
+                <input type="hidden" id="editPartidoId">
+                <div>
+                    <label for="editPartidoNombre">Nombre:</label>
+                    <input type="text" id="editPartidoNombre" required>
+                </div>
+                <div>
+                    <label for="editPartidoIdeologia">Ideología:</label>
+                    <input type="text" id="editPartidoIdeologia" required>
+                </div>
+                <div>
+                    <label for="editPartidoFundacion">Fundación:</label>
+                    <input type="date" id="editPartidoFundacion" required>
+                </div>
+                <div>
+                    <label for="editPartidoDescripcion">Descripción:</label>
+                    <textarea id="editPartidoDescripcion" rows="3"></textarea>
+                </div>
+                <button type="submit">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Politico Modal -->
+    <div id="editPoliticoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('editPoliticoModal')">&times;</span>
+            <h2>Editar Político</h2>
+            <form id="editPoliticoForm">
+                <input type="hidden" id="editPoliticoId">
+                <div>
+                    <label for="editPoliticoNombre">Nombre:</label>
+                    <input type="text" id="editPoliticoNombre" required>
+                </div>
+                <div>
+                    <label for="editPoliticoCargoActual">Cargo Actual:</label>
+                    <input type="text" id="editPoliticoCargoActual" required>
+                </div>
+                <div>
+                    <label for="editPoliticoPerfilIdeologico">Perfil Ideológico:</label>
+                    <input type="text" id="editPoliticoPerfilIdeologico">
+                </div>
+                <div>
+                    <label for="editPoliticoTwitter">Twitter:</label>
+                    <input type="text" id="editPoliticoTwitter">
+                </div>
+                <div>
+                    <label for="editPoliticoPartidoId">ID del Partido:</label>
+                    <input type="number" id="editPoliticoPartidoId" required>
+                </div>
+                <button type="submit">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // !!! IMPORTANTE: Cambia esta URL a la URL base de tu API (ej. https://localhost:7000/api) !!!
+        const API_BASE_URL = '/api'; // API will be served from the same origin
+
+        // --- Funciones de Utilidad para Modales ---
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+
+        // --- Funciones para Partidos ---
+        async function fetchPartidos() {
+            const response = await fetch(`${API_BASE_URL}/Partidos`);
+            const partidos = await response.json();
+            const tableBody = document.getElementById('partidosTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+            partidos.forEach(partido => {
+                const row = tableBody.insertRow();
+                row.insertCell().textContent = partido.id;
+                row.insertCell().textContent = partido.nombre;
+                row.insertCell().textContent = partido.ideologia;
+                row.insertCell().textContent = new Date(partido.fundacion).toLocaleDateString();
+                row.insertCell().textContent = partido.descripcion;
+                const actionsCell = row.insertCell();
+
+                const editBtn = document.createElement('button');
+                editBtn.textContent = 'Editar';
+                editBtn.className = 'edit-btn';
+                editBtn.onclick = () => editPartido(partido);
+                actionsCell.appendChild(editBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Eliminar';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = () => deletePartido(partido.id);
+                actionsCell.appendChild(deleteBtn);
+            });
+        }
+
+        async function createPartido(event) {
+            event.preventDefault();
+            const nombre = document.getElementById('partidoNombre').value;
+            const ideologia = document.getElementById('partidoIdeologia').value;
+            const fundacion = document.getElementById('partidoFundacion').value;
+            const descripcion = document.getElementById('partidoDescripcion').value;
+
+            const newPartido = { nombre, ideologia, fundacion, descripcion };
+
+            const response = await fetch(`${API_BASE_URL}/Partidos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newPartido)
+            });
+
+            if (response.ok) {
+                alert('Partido creado exitosamente!');
+                document.getElementById('createPartidoForm').reset();
+                fetchPartidos();
+            } else {
+                const errorData = await response.json();
+                alert('Error al crear partido: ' + JSON.stringify(errorData));
+            }
+        }
+
+        async function editPartido(partido) {
+            document.getElementById('editPartidoId').value = partido.id;
+            document.getElementById('editPartidoNombre').value = partido.nombre;
+            document.getElementById('editPartidoIdeologia').value = partido.ideologia;
+            // Format date for input type="date"
+            document.getElementById('editPartidoFundacion').value = new Date(partido.fundacion).toISOString().split('T')[0];
+            document.getElementById('editPartidoDescripcion').value = partido.descripcion;
+            openModal('editPartidoModal');
+        }
+
+        async function updatePartido(event) {
+            event.preventDefault();
+            const id = document.getElementById('editPartidoId').value;
+            const nombre = document.getElementById('editPartidoNombre').value;
+            const ideologia = document.getElementById('editPartidoIdeologia').value;
+            const fundacion = document.getElementById('editPartidoFundacion').value;
+            const descripcion = document.getElementById('editPartidoDescripcion').value;
+
+            const updatedPartido = { id: parseInt(id), nombre, ideologia, fundacion, descripcion };
+
+            const response = await fetch(`${API_BASE_URL}/Partidos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedPartido)
+            });
+
+            if (response.ok) {
+                alert('Partido actualizado exitosamente!');
+                closeModal('editPartidoModal');
+                fetchPartidos();
+            } else {
+                const errorData = await response.json();
+                alert('Error al actualizar partido: ' + JSON.stringify(errorData));
+            }
+        }
+
+        async function deletePartido(id) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este partido?')) return;
+
+            const response = await fetch(`${API_BASE_URL}/Partidos/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert('Partido eliminado exitosamente!');
+                fetchPartidos();
+            } else {
+                const errorData = await response.json();
+                alert('Error al eliminar partido: ' + JSON.stringify(errorData));
+            }
+        }
+
+        // --- Funciones para Políticos ---
+        async function fetchPoliticos() {
+            // Asumiendo que hay un GET general para Politicos que devuelve todos los campos
+            const response = await fetch(`${API_BASE_URL}/Politicos`); 
+            const politicos = await response.json();
+            const tableBody = document.getElementById('politicosTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+            politicos.forEach(politico => {
+                const row = tableBody.insertRow();
+                row.insertCell().textContent = politico.id;
+                row.insertCell().textContent = politico.nombre;
+                row.insertCell().textContent = politico.cargoActual;
+                row.insertCell().textContent = politico.perfilIdeologico;
+                row.insertCell().textContent = politico.twitter;
+                row.insertCell().textContent = politico.partidoId;
+                const actionsCell = row.insertCell();
+
+                const editBtn = document.createElement('button');
+                editBtn.textContent = 'Editar';
+                editBtn.className = 'edit-btn';
+                editBtn.onclick = () => editPolitico(politico);
+                actionsCell.appendChild(editBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Eliminar';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = () => deletePolitico(politico.id);
+                actionsCell.appendChild(deleteBtn);
+            });
+        }
+
+        async function createPolitico(event) {
+            event.preventDefault();
+            const nombre = document.getElementById('politicoNombre').value;
+            const cargoActual = document.getElementById('politicoCargoActual').value;
+            const perfilIdeologico = document.getElementById('politicoPerfilIdeologico').value;
+            const twitter = document.getElementById('politicoTwitter').value;
+            const partidoId = parseInt(document.getElementById('politicoPartidoId').value);
+
+            const newPolitico = { nombre, cargoActual, perfilIdeologico, twitter, partidoId };
+
+            const response = await fetch(`${API_BASE_URL}/Politicos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newPolitico)
+            });
+
+            if (response.ok) {
+                alert('Político creado exitosamente!');
+                document.getElementById('createPoliticoForm').reset();
+                fetchPoliticos();
+            } else {
+                const errorData = await response.json();
+                alert('Error al crear político: ' + JSON.stringify(errorData));
+            }
+        }
+
+        async function editPolitico(politico) {
+            document.getElementById('editPoliticoId').value = politico.id;
+            document.getElementById('editPoliticoNombre').value = politico.nombre;
+            document.getElementById('editPoliticoCargoActual').value = politico.cargoActual;
+            document.getElementById('editPoliticoPerfilIdeologico').value = politico.perfilIdeologico;
+            document.getElementById('editPoliticoTwitter').value = politico.twitter;
+            document.getElementById('editPoliticoPartidoId').value = politico.partidoId;
+            openModal('editPoliticoModal');
+        }
+
+        async function updatePolitico(event) {
+            event.preventDefault();
+            const id = document.getElementById('editPoliticoId').value;
+            const nombre = document.getElementById('editPoliticoNombre').value;
+            const cargoActual = document.getElementById('editPoliticoCargoActual').value;
+            const perfilIdeologico = document.getElementById('editPoliticoPerfilIdeologico').value;
+            const twitter = document.getElementById('editPoliticoTwitter').value;
+            const partidoId = parseInt(document.getElementById('editPoliticoPartidoId').value);
+
+            const updatedPolitico = { id: parseInt(id), nombre, cargoActual, perfilIdeologico, twitter, partidoId };
+
+            const response = await fetch(`${API_BASE_URL}/Politicos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedPolitico)
+            });
+
+            if (response.ok) {
+                alert('Político actualizado exitosamente!');
+                closeModal('editPoliticoModal');
+                fetchPoliticos();
+            } else {
+                const errorData = await response.json();
+                alert('Error al actualizar político: ' + JSON.stringify(errorData));
+            }
+        }
+
+        async function deletePolitico(id) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este político?')) return;
+
+            const response = await fetch(`${API_BASE_URL}/Politicos/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert('Político eliminado exitosamente!');
+                fetchPoliticos();
+            } else {
+                const errorData = await response.json();
+                alert('Error al eliminar político: ' + JSON.stringify(errorData));
+            }
+        }
+
+        // --- Inicialización ---
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('createPartidoForm').addEventListener('submit', createPartido);
+            document.getElementById('editPartidoForm').addEventListener('submit', updatePartido);
+            document.getElementById('createPoliticoForm').addEventListener('submit', createPolitico);
+            document.getElementById('editPoliticoForm').addEventListener('submit', updatePolitico);
+            fetchPartidos();
+            fetchPoliticos();
+        });
+    </script>
+</body>
+</html>

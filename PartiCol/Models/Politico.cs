@@ -10,8 +10,6 @@
 
         public int PartidoId { get; set; }
 
-        public Partido Partido { get; set; }
-
-        public ICollection<Politico>? Politicos { get; set; }
+        public Partido? Partido { get; set; }
     }
 }
