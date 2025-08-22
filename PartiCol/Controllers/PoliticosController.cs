@@ -24,10 +24,12 @@ namespace PartiCol.Controllers // ⬅️ igual aquí si tu namespace es otro
                 .Include(p => p.Partido) // JOIN con Partidos
                 .Select(p => new
                 {
+                    p.Id,
                     p.Nombre,
                     p.CargoActual,
                     PerfilIdeologico = p.PerfilIdeologico ?? "",
                     Twitter = p.Twitter ?? "",
+                    Foto = p.Foto ?? "",
                     Partido = p.Partido.Nombre,
                     IdeologiaPartido = p.Partido.Ideologia
                 })
@@ -87,7 +89,19 @@ namespace PartiCol.Controllers // ⬅️ igual aquí si tu namespace es otro
                 return BadRequest();
             }
 
-            _context.Entry(politico).State = EntityState.Modified;
+            var existingPolitico = await _context.Politicos.FindAsync(id);
+            if (existingPolitico == null)
+            {
+                return NotFound();
+            }
+
+            // Update properties
+            existingPolitico.Nombre = politico.Nombre;
+            existingPolitico.CargoActual = politico.CargoActual;
+            existingPolitico.PerfilIdeologico = politico.PerfilIdeologico;
+            existingPolitico.Twitter = politico.Twitter;
+            existingPolitico.PartidoId = politico.PartidoId;
+            existingPolitico.Foto = politico.Foto; // Update the Foto property
 
             try
             {
