@@ -32,10 +32,10 @@ function PoliticianCard({ politician, onDelete, onEdit }) {
             <DeleteIcon fontSize="small" />
           </IconButton>
           {politician.twitter && (
-            <Link href={politician.twitter} target="_blank" rel="noopener">
-              <TwitterIcon />
-            </Link>
-          )}
+              <Link href={politician.twitter} target="_blank" rel="noopener">
+                <TwitterIcon />
+              </Link>
+            )}
           {politician.facebook && (
             <Link href={politician.facebook} target="_blank" rel="noopener">
               <FacebookIcon />

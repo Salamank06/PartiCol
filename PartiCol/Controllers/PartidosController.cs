@@ -19,6 +19,16 @@ public class PartidosController : ControllerBase
     public async Task<IActionResult> GetPartidos()
     {
         var data = await _context.Partidos
+            .Select(p => new
+            {
+                p.Id,
+                p.Nombre,
+                p.Ideologia,
+                p.Fundacion,
+                p.Descripcion,
+                p.LogoUrl,
+                p.Twitter
+            })
             .AsNoTracking()
             .ToListAsync();
 
@@ -45,6 +55,17 @@ public class PartidosController : ControllerBase
     {
         var partido = await _context.Partidos
             .Include(p => p.Politicos)
+            .Select(p => new
+            {
+                p.Id,
+                p.Nombre,
+                p.Ideologia,
+                p.Fundacion,
+                p.Descripcion,
+                p.LogoUrl,
+                p.Twitter,
+                Politicos = p.Politicos.Select(pol => new { pol.Id, pol.Nombre }).ToList()
+            })
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -62,6 +83,8 @@ public class PartidosController : ControllerBase
             Ideologia = partidoDto.Ideologia,
             Fundacion = partidoDto.Fundacion,
             Descripcion = partidoDto.Descripcion,
+            LogoUrl = partidoDto.LogoUrl,
+            Twitter = partidoDto.Twitter,
             Politicos = new List<Politico>() // Ensure Politicos list is empty for new Partido
         };
 
@@ -81,7 +104,18 @@ public class PartidosController : ControllerBase
             return BadRequest();
         }
 
-        _context.Entry(partido).State = EntityState.Modified;
+        var existingPartido = await _context.Partidos.FindAsync(id);
+        if (existingPartido == null)
+        {
+            return NotFound();
+        }
+
+        existingPartido.Nombre = partido.Nombre;
+        existingPartido.Ideologia = partido.Ideologia;
+        existingPartido.Fundacion = partido.Fundacion;
+        existingPartido.Descripcion = partido.Descripcion;
+        existingPartido.LogoUrl = partido.LogoUrl; // Update LogoUrl
+        existingPartido.Twitter = partido.Twitter; // Update Twitter
 
         try
         {

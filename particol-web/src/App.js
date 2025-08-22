@@ -6,6 +6,7 @@ import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { Routes, Route, Link } from 'react-router-dom';
 
 import PoliticiansView from './components/PoliticiansView';
+import PartiesView from './components/PartiesView';
 import MapView from './components/MapView';
 import TimelineView from './components/TimelineView';
 import ComparatorView from './components/ComparatorView';
@@ -30,6 +31,9 @@ function App() {
       <List>
         <ListItem component={Link} to="/politicos" button>
           <ListItemText primary="Políticos" sx={{ color: 'text.primary' }} />
+        </ListItem>
+        <ListItem component={Link} to="/partidos" button>
+          <ListItemText primary="Partidos" sx={{ color: 'text.primary' }} />
         </ListItem>
         <ListItem component={Link} to="/mapa" button>
           <ListItemText primary="Mapa" sx={{ color: 'text.primary' }} />
@@ -106,6 +110,7 @@ function App() {
           <Toolbar /> {/* This adds padding below the AppBar */}
           <Routes>
             <Route path="/politicos" element={<PoliticiansView />} />
+            <Route path="/partidos" element={<PartiesView />} />
             <Route path="/mapa" element={<MapView />} />
             <Route path="/timeline" element={<TimelineView />} />
             <Route path="/comparador" element={<ComparatorView />} />
